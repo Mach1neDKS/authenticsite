@@ -1,0 +1,21 @@
+/* CLEAN FINAL STYLE */
+
+.btn-secondary{
+padding:18px 50px;
+border-radius:14px;
+border:2px solid #2d7cff;
+color:#6ae3ff;
+text-decoration:none;
+font-weight:700;
+transition:.3s;
+background:transparent;
+}
+
+.btn-secondary:hover{
+background:#2d7cff;
+color:#000;
+}
+
+.allowlist-form textarea{
+min-height:140px;
+}

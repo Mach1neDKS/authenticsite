@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Authentic RP</title>
+<link rel="icon" href="assets/logo.png">
+<link rel="stylesheet" href="style.css">
+<script defer src="script.js"></script>
+</head>
+<body>
+
+<!-- ===== PREMIUM LOADER ===== -->
+<div id="page-loader">
+  <div class="loader-overlay"></div>
+
+  <div class="loader-wrapper">
+    <img src="assets/logo.png" alt="Authentic RP Logo" class="loader-logo">
+    <div class="loader-line"></div>
+    <span class="loader-text">AUTHENTIC ROLEPLAY</span>
+  </div>
+</div>
+
+
+<script>
+document.body.style.overflow = "hidden";
+
+window.addEventListener("load", () => {
+  const loader = document.getElementById("page-loader");
+
+  setTimeout(() => {
+    loader.classList.add("hide");
+    document.body.style.overflow = "";
+  }, 1200); // cinematic delay
+});
+</script>
+<div class="layout">
+
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-brand">
+      <img src="assets/logo.png">
+      <span>AUTHENTIC</span>
+    </div>
+    <div class="nav-links">
+      <a href="index.html" class="active">Home</a>
+      <a href="#status">Server Status</a>
+      <a href="allowlist.html">Allowlist</a>
+      <a href="staff.html">Staff</a>
+      <a href="https://discord.gg/authentic2026" target="_blank" class="btn-discord">Join Discord</a>
+    </div>
+  </div>
+</nav>
+
+<main class="content">
+
+<header class="hero">
+  <img class="hero-logo" src="assets/logo.png">
+  <h1>AUTHENTIC ROLEPLAY</h1>
+  <p>Elite FiveM Roleplay · Seriøs RP</p>
+  <a class="btn-primary" href="allowlist.html">Ansøg om Allowlist</a>
+</header>
+
+<section id="status" class="section">
+  <h2>Live Server Status</h2>
+  <div class="status-card">
+    <span class="status-dot online"></span>
+    <strong>ONLINE · Join via FiveM</strong>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p>© Authentic RP</p>
+</footer>
+
+</div>
+</body>
+</html>
