@@ -3,328 +3,269 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MiniSpil | Authentic RP</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Authentic RP | High Speed Pursuit</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@600;700&family=Inter:wght@400;900&display=swap');
+
         :root {
-            --auth-blue: #00aaff;
-            --police-blue: #02102b;
+            --fivem-orange: #00aaff;
+            --police-blue: #0b1a3a;
             --police-yellow: #d4ff00;
-            --road-grey: #1a1a1b;
+            --danger: #ff3333;
         }
 
         body {
-            background: #040810;
+            background: #020406;
             margin: 0;
-            overflow: hidden;
             font-family: 'Inter', sans-serif;
+            color: white;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
 
-        #game-container {
+        #viewport {
+            position: relative;
+            width: 440px;
+            height: 85vh;
+            background: #111;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 3px solid #1a1a1b;
+            box-shadow: 0 0 50px rgba(0,0,0,1);
+        }
+
+        canvas { display: block; width: 100%; height: 100%; }
+
+        /* HUD */
+        .hud {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 50;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            padding-top: 80px;
-        }
-
-        #game-canvas-area {
-            position: relative;
-            width: 100%;
-            max-width: 480px;
-            height: 80vh;
-            max-height: 800px;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 0 40px rgba(0, 170, 255, 0.2), inset 0 0 20px rgba(0,0,0,0.5);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        canvas { width: 100%; height: 100%; display: block; background: var(--road-grey); }
-
-        .game-ui {
-            position: absolute;
-            top: 25px;
-            left: 0;
-            width: 100%;
-            padding: 0 25px;
-            display: flex;
-            justify-content: space-between;
+            gap: 8px;
             pointer-events: none;
-            z-index: 5;
         }
 
-        .stat-item {
-            background: rgba(0, 0, 0, 0.6);
-            padding: 10px 18px;
-            border-radius: 12px;
+        .hud-card {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 10px 15px;
+            border-right: 4px solid var(--fivem-orange);
+            text-align: right;
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
         }
 
-        .stat-label { color: var(--auth-blue); font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
-        .stat-value { color: white; font-size: 1.4rem; font-weight: 900; display: block; }
+        .hud-label { font-size: 9px; text-transform: uppercase; color: #888; letter-spacing: 2px; }
+        .hud-val { font-size: 22px; font-weight: 900; font-family: 'Oswald', sans-serif; display: block; }
 
+        /* MENU / OVERLAYS */
         .overlay {
             position: absolute;
             inset: 0;
-            background: rgba(4, 8, 16, 0.95);
-            backdrop-filter: blur(15px);
+            background: radial-gradient(circle, rgba(15, 25, 40, 0.98), #000);
+            z-index: 100;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            z-index: 10;
-            transition: 0.4s ease;
+            padding: 40px;
             text-align: center;
-            padding: 30px;
         }
 
-        .overlay h1 { font-size: 3rem; font-weight: 900; color: white; margin: 0; letter-spacing: -1px; }
-        .overlay h1 span { color: var(--auth-blue); }
-        .overlay p { color: rgba(255,255,255,0.6); margin: 15px 0 30px; line-height: 1.6; }
+        .brand h1 { font-family: 'Oswald', sans-serif; font-size: 3rem; font-style: italic; margin: 0; text-transform: uppercase; }
+        .brand span { color: var(--fivem-orange); }
 
-        .btn-start, .btn-secondary {
-            border: none;
-            padding: 18px 50px;
-            font-size: 1.1rem;
-            font-weight: 800;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: 0.3s;
-            text-transform: uppercase;
-            margin: 5px;
-        }
-
-        .btn-start {
-            background: var(--auth-blue);
-            color: white;
-            box-shadow: 0 10px 30px rgba(0, 170, 255, 0.4);
-        }
-
-        .btn-start:hover { transform: translateY(-5px); background: #33bbff; box-shadow: 0 15px 40px rgba(0, 170, 255, 0.6); }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            padding: 12px 30px;
-            font-size: 0.9rem;
-        }
-
-        #wanted-level {
-            position: absolute;
-            top: 100px;
+        .leaderboard {
             width: 100%;
-            text-align: center;
-            color: #ff3333;
-            font-weight: 900;
-            font-size: 1.2rem;
-        }
-
-        #leaderboard-list {
-            width: 100%;
-            max-width: 300px;
             margin: 20px 0;
-            text-align: left;
-            border-collapse: collapse;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 4px;
         }
 
-        #leaderboard-list td { padding: 10px 5px; color: white; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        #leaderboard-list td.rank { color: var(--auth-blue); font-weight: 900; }
-        #leaderboard-list td.score { text-align: right; font-weight: 900; }
+        .lb-row { display: flex; justify-content: space-between; padding: 10px 15px; border-bottom: 1px solid rgba(255,255,255,0.02); font-size: 14px; }
+
+        .btn {
+            background: var(--fivem-orange);
+            color: #000;
+            border: none;
+            padding: 16px 40px;
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            cursor: pointer;
+            clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
+            transition: 0.2s;
+            margin: 5px;
+            width: 80%;
+        }
+        .btn:hover { background: #fff; transform: scale(1.05); }
+        .btn-alt { background: #444; color: white; }
+
+        /* GAME OVER SCREEN */
+        #game-over { display: none; z-index: 110; background: rgba(0,0,0,0.9); }
+        .result-score { font-size: 4rem; font-family: 'Oswald', sans-serif; color: var(--fivem-orange); margin: 0; }
     </style>
 </head>
 <body>
 
-<nav class="nav">
-  <div class="nav-inner">
-    <div class="nav-brand">
-      <img src="assets/logo.png">
-      <span>AUTHENTIC</span>
+<div id="viewport">
+    <div class="hud">
+        <div class="hud-card"><span class="hud-label">Eftersøgt</span><div id="stars" style="color:var(--fivem-orange)">★★</div></div>
+        <div class="hud-card"><span class="hud-label">Score</span><span id="score-val" class="hud-val">0</span></div>
     </div>
-    <div class="nav-links">
-      <a href="index.html">Home</a>
-      <a href="applications.html">Ansøgninger</a>
-      <a href="staff.html">Staff</a>
-      <a href="game.html" class="active">MiniSpil</a>
-      <a href="https://docs.google.com/document/d/1nRhUJcx4joCEx1ZyuRJ-Ml2s04JpWjF4CiT2tOSLjQM/edit?usp=sharing" target="_blank">Regler</a>
-      <a href="https://discord.gg/authentic2026" target="_blank" class="btn-discord">Join Discord</a>
+
+    <div id="main-menu" class="overlay">
+        <div class="brand"><h1>AUTHENTIC<span> RP</span></h1></div>
+        <p style="letter-spacing: 5px; font-size: 10px; color: #555; margin-bottom: 20px;">AUTHENTIC RANGLISTE</p>
+        <div class="leaderboard" id="lb-content">Henter rankings...</div>
+        <button class="btn" onclick="startGame()">Start Flugten</button>
     </div>
-  </div>
-</nav>
 
-<div id="game-container">
-    <div id="game-canvas-area">
-        <div class="game-ui">
-            <div class="stat-item">
-                <span class="stat-label">Score</span>
-                <span id="score" class="stat-value">0</span>
-            </div>
-            <div class="stat-item" style="text-align: right;">
-                <span class="stat-label">Top</span>
-                <span id="highscore" class="stat-value">0</span>
-            </div>
-        </div>
-        
-        <div id="wanted-level"></div>
-
-        <div id="menu-start" class="overlay">
-            <h1>AUTHENTIC<span>FLUGTEN</span></h1>
-            <p>Undvig politiet på motorvejen. Ingen safe-zones her!</p>
-            <button class="btn-start" onclick="initGame()">Start Flugten</button>
-            <button class="btn-secondary" onclick="toggleLeaderboard(true)">Leaderboard</button>
-        </div>
-
-        <div id="menu-leaderboard" class="overlay" style="display: none;">
-            <h1>TOP 10 <span>HELTE</span></h1>
-            <table id="leaderboard-list"></table>
-            <button class="btn-secondary" onclick="toggleLeaderboard(false)">Tilbage</button>
-        </div>
-
-        <div id="menu-over" class="overlay" style="display: none; opacity: 0;">
-            <h1 style="color: #ff4444;">ANHOLDT</h1>
-            <div class="stat-item" style="margin: 20px 0;">
-                <span id="final-score" class="stat-value">0</span>
-            </div>
-            <button class="btn-start" onclick="initGame()">Prøv Igen</button>
-            <button class="btn-secondary" onclick="toggleLeaderboard(true)">Leaderboard</button>
-        </div>
-
-        <canvas id="canvas"></canvas>
+    <div id="game-over" class="overlay">
+        <h2 style="font-family:'Oswald'; letter-spacing:10px; color:var(--danger); margin:0;">Anholdt</h2>
+        <p class="hud-label">Din score blev:</p>
+        <h1 id="final-score" class="result-score">0</h1>
+        <button class="btn" onclick="promptSaveScore()">Gem på Leaderboard</button>
+        <button class="btn btn-alt" onclick="startGame()">Prøv igen nu</button>
+        <button class="btn btn-alt" style="font-size:0.8rem" onclick="showMenu()">Tilbage til menu</button>
     </div>
+
+    <canvas id="gameCanvas"></canvas>
 </div>
 
 <script>
-    const canvas = document.getElementById('canvas');
+    const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
-    const scoreEl = document.getElementById('score');
-    const highscoreEl = document.getElementById('highscore');
-    const wantedEl = document.getElementById('wanted-level');
-    
-    let cW = canvas.width = 480;
-    let cH = canvas.height = 800;
+    canvas.width = 440;
+    canvas.height = 800;
+
+    const BIN_URL = "https://api.jsonbin.io/v3/b/67a151b7e41b4d34e4835c60";
+    const API_KEY = "$2a$10$O9lO6CAsT4tVp9FvY.FvyeD8UoV2/WlR8j9P.TfK5WlO9FvyeD8Uo";
+
     let active = false;
     let score = 0;
-    let highscore = localStorage.getItem('auth_top') || 0;
-    highscoreEl.innerText = highscore;
-
-    let roadOffset = 0;
-    let gameSpeed = 8;
-    let player = { x: 215, y: 650, w: 50, h: 90 };
-    let enemies = [];
+    let gameSpeed = 6;
     let frame = 0;
+    let player = { x: 195, y: 650, w: 50, h: 90 };
+    let enemies = [];
     const keys = {};
 
-    document.addEventListener('keydown', e => keys[e.code] = true);
-    document.addEventListener('keyup', e => keys[e.code] = false);
+    // CLOUD FUNKTIONER
+    async function loadLeaderboard() {
+        try {
+            const r = await fetch(BIN_URL + "/latest", { headers: { "X-Master-Key": API_KEY } });
+            const d = await r.json();
+            const s = d.record.scores || [];
+            document.getElementById('lb-content').innerHTML = s.map((x, i) => `
+                <div class="lb-row"><span><b>#${i+1}</b> ${x.name}</span><b>${x.score}</b></div>
+            `).join('');
+        } catch(e) { document.getElementById('lb-content').innerHTML = "Fejl ved indlæsning..."; }
+    }
 
-    // Leaderboard System
-    let leaderboard = JSON.parse(localStorage.getItem('auth_leaderboard')) || [];
-
-    function updateLeaderboard(finalScore) {
-        const isTopTen = leaderboard.length < 10 || finalScore > leaderboard[leaderboard.length - 1]?.score;
-        if (isTopTen && finalScore > 0) {
-            setTimeout(() => {
-                const name = prompt("TOP 10! Indtast dit navn (max 12 tegn):");
-                if (name) {
-                    leaderboard.push({ name: name.substring(0, 12), score: finalScore });
-                    leaderboard.sort((a, b) => b.score - a.score);
-                    leaderboard = leaderboard.slice(0, 10);
-                    localStorage.setItem('auth_leaderboard', JSON.stringify(leaderboard));
-                }
-            }, 500);
+    async function promptSaveScore() {
+        const name = prompt("Indtast dit navn for at gemme din score på " + score + ":");
+        if(name && name.trim().length > 0) {
+            document.getElementById('lb-content').innerHTML = "Gemmer...";
+            let current = await (await fetch(BIN_URL + "/latest", { headers: { "X-Master-Key": API_KEY } })).json();
+            let list = current.record.scores || [];
+            list.push({ name: name.substring(0, 15), score: score });
+            list.sort((a,b) => b.score - a.score);
+            await fetch(BIN_URL, {
+                method: 'PUT',
+                headers: { "Content-Type": "application/json", "X-Master-Key": API_KEY },
+                body: JSON.stringify({ scores: list.slice(0, 8) })
+            });
+            showMenu();
         }
     }
 
-    function renderLeaderboard() {
-        const list = document.getElementById('leaderboard-list');
-        list.innerHTML = leaderboard.map((e, i) => `
-            <tr><td class="rank">#${i + 1}</td><td>${e.name}</td><td class="score">${e.score}</td></tr>
-        `).join('');
-    }
+    // GAME LOGIK
+    window.onkeydown = e => keys[e.code] = true;
+    window.onkeyup = e => keys[e.code] = false;
 
-    function toggleLeaderboard(show) {
-        renderLeaderboard();
-        document.getElementById('menu-leaderboard').style.display = show ? 'flex' : 'none';
-        document.getElementById('menu-start').style.display = show ? 'none' : 'flex';
-        document.getElementById('menu-over').style.display = 'none';
-    }
-
-    function drawDanishPolice(en) {
-        ctx.fillStyle = '#02102b';
-        ctx.beginPath(); ctx.roundRect(en.x, en.y, en.w, en.h, 10); ctx.fill();
+    function drawPolice(en) {
+        ctx.fillStyle = '#0b1a3a';
+        ctx.beginPath(); ctx.roundRect(en.x, en.y, en.w, en.h, 6); ctx.fill();
         ctx.fillStyle = '#d4ff00';
-        ctx.fillRect(en.x, en.y + 25, 4, 40); ctx.fillRect(en.x + en.w - 4, en.y + 25, 4, 40);
-        let flash = Math.sin(Date.now() / 50) > 0;
-        ctx.fillStyle = flash ? '#0066ff' : '#002244';
-        ctx.fillRect(en.x + 8, en.y + 2, 14, 6);
-        ctx.fillStyle = !flash ? '#0066ff' : '#002244';
-        ctx.fillRect(en.x + 28, en.y + 2, 14, 6);
-    }
-
-    function drawPlayer() {
-        ctx.shadowBlur = 15; ctx.shadowColor = 'rgba(0, 170, 255, 0.5)';
-        ctx.fillStyle = '#00aaff';
-        ctx.beginPath(); ctx.roundRect(player.x, player.y, player.w, player.h, 10); ctx.fill();
+        ctx.fillRect(en.x, en.y + 20, 3, 45);
+        ctx.fillRect(en.x + en.w - 3, en.y + 20, 3, 45);
+        
+        // Blink
+        let flash = Math.sin(Date.now() / 60) > 0;
+        ctx.fillStyle = flash ? '#007bff' : '#ff0000';
+        ctx.shadowBlur = 15; ctx.shadowColor = ctx.fillStyle;
+        ctx.fillRect(en.x + 5, en.y + 2, en.w - 10, 5);
         ctx.shadowBlur = 0;
-    }
-
-    function drawRoad() {
-        roadOffset = (roadOffset + gameSpeed) % 80;
-        ctx.fillStyle = '#1a1a1b'; ctx.fillRect(0,0,cW,cH);
-        ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.lineWidth = 4; ctx.setLineDash([40, 40]); ctx.lineDashOffset = -roadOffset;
-        [cW*0.25, cW*0.5, cW*0.75].forEach(x => { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, cH); ctx.stroke(); });
     }
 
     function update() {
         if(!active) return;
         frame++;
-        if(keys['ArrowLeft'] || keys['KeyA']) player.x -= 8;
-        if(keys['ArrowRight'] || keys['KeyD']) player.x += 8;
-        player.x = Math.max(25, Math.min(cW - 75, player.x));
 
-        if(frame % 500 === 0) gameSpeed += 0.5;
-        wantedEl.innerText = "★".repeat(Math.min(5, Math.floor(gameSpeed / 4)));
+        if(keys['ArrowLeft'] || keys['KeyA']) player.x -= 7;
+        if(keys['ArrowRight'] || keys['KeyD']) player.x += 7;
+        player.x = Math.max(20, Math.min(370, player.x));
 
-        if(frame % Math.max(30, 70 - Math.floor(gameSpeed)) === 0) {
-            // FIX: Banerne er rykket ind (0.42 og 0.58), så hullet er mindre end spillerens bil
-            const lanes = [cW*0.15, cW*0.42, cW*0.58, cW*0.85];
-            const drift = (Math.random() - 0.5) * 20; // Gør det umuligt at forudsige midten
-            enemies.push({
-                x: lanes[Math.floor(Math.random()*lanes.length)] - 25 + drift,
-                y: -120, w: 50, h: 90,
-                speed: gameSpeed * 0.7 + Math.random() * 3
-            });
+        gameSpeed += 0.0015;
+        document.getElementById('stars').innerText = "★".repeat(Math.min(5, Math.floor(gameSpeed/3.5)));
+
+        if(frame % Math.max(25, 65 - Math.floor(gameSpeed)) === 0) {
+            const lane = [60, 220, 380];
+            enemies.push({ x: lane[Math.floor(Math.random()*3)] - 25, y: -100, w: 50, h: 90, s: gameSpeed * (0.8 + Math.random()*0.3) });
         }
 
         enemies.forEach((en, i) => {
-            en.y += en.speed;
-            drawDanishPolice(en);
-            if(player.x < en.x + en.w - 4 && player.x + player.w - 4 > en.x &&
-               player.y < en.y + en.h - 5 && player.y + player.h - 5 > en.y) gameOver();
-            if(en.y > cH) { enemies.splice(i, 1); score += 10; scoreEl.innerText = score; }
+            en.y += en.s;
+            drawPolice(en);
+            if(player.x < en.x + en.w - 5 && player.x + player.w - 5 > en.x &&
+               player.y < en.y + en.h - 5 && player.y + player.h - 5 > en.y) {
+                gameOver();
+            }
+            if(en.y > 800) { enemies.splice(i,1); score += 10; document.getElementById('score-val').innerText = score; }
         });
     }
 
-    function loop() { drawRoad(); update(); if(active) drawPlayer(); requestAnimationFrame(loop); }
-
-    function initGame() {
-        active = true; score = 0; gameSpeed = 8; frame = 0; enemies = []; player.x = 215;
-        scoreEl.innerText = "0";
-        document.querySelectorAll('.overlay').forEach(el => el.style.display = 'none');
+    function startGame() {
+        document.getElementById('main-menu').style.display = 'none';
+        document.getElementById('game-over').style.display = 'none';
+        active = true; score = 0; gameSpeed = 6; frame = 0; enemies = []; player.x = 195;
+        document.getElementById('score-val').innerText = "0";
     }
 
     function gameOver() {
         active = false;
-        if(score > highscore) { highscore = score; localStorage.setItem('auth_top', highscore); highscoreEl.innerText = highscore; }
         document.getElementById('final-score').innerText = score;
-        const over = document.getElementById('menu-over');
-        over.style.display = 'flex'; setTimeout(() => over.style.opacity = '1', 50);
-        updateLeaderboard(score);
+        document.getElementById('game-over').style.display = 'flex';
     }
 
-    renderLeaderboard();
+    function showMenu() {
+        document.getElementById('game-over').style.display = 'none';
+        document.getElementById('main-menu').style.display = 'flex';
+        loadLeaderboard();
+    }
+
+    function loop() {
+        ctx.fillStyle = '#151515'; ctx.fillRect(0,0,440,800);
+        ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+        ctx.setLineDash([40, 40]); ctx.lineDashOffset = -(frame * gameSpeed);
+        [146, 292].forEach(x => { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 800); ctx.stroke(); });
+
+        update();
+        if(active) { 
+            ctx.fillStyle = '#00aaff'; 
+            ctx.shadowBlur = 10; ctx.shadowColor = 'rgba(255,171,0,0.5)';
+            ctx.beginPath(); ctx.roundRect(player.x, player.y, player.w, player.h, 8); ctx.fill(); 
+            ctx.shadowBlur = 0;
+        }
+        requestAnimationFrame(loop);
+    }
+
+    loadLeaderboard();
     loop();
 </script>
 </body>
