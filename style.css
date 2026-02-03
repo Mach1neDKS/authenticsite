@@ -1,5 +1,98 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700;900&display=swap");
 
+/* ===== LOADER ===== */
+
+#page-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  pointer-events: all;
+}
+
+/* BLUR + DARK OVERLAY */
+.loader-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(4, 8, 16, 0.85);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+}
+
+/* CENTER */
+.loader-center {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  animation: loaderIntro 1.2s ease forwards;
+}
+
+.loader-center img {
+  width: 120px;
+  margin-bottom: 20px;
+  filter: drop-shadow(0 0 40px rgba(0,170,255,0.9));
+  animation: logoPulse 2.2s infinite ease-in-out;
+}
+
+.loader-center h1 {
+  font-size: 2.6rem;
+  letter-spacing: 8px;
+  margin-bottom: 25px;
+}
+
+.loader-center p {
+  font-size: 0.85rem;
+  letter-spacing: 2px;
+  opacity: 0.7;
+}
+
+/* BAR */
+.loader-bar {
+  width: 260px;
+  height: 4px;
+  background: rgba(255,255,255,0.12);
+  overflow: hidden;
+  border-radius: 4px;
+  margin-bottom: 18px;
+}
+
+.loader-bar span {
+  display: block;
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #00aaff, #6fd3ff);
+  animation: loaderProgress 2.8s ease forwards;
+}
+
+/* EXIT */
+#page-loader.fade-out {
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+
+/* ANIMATIONS */
+@keyframes loaderIntro {
+  from { opacity: 0; transform: translateY(25px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes logoPulse {
+  0% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.9; }
+}
+
+@keyframes loaderProgress {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+
+
+
+
 /* =====================
    ROOT & RESET
    ===================== */

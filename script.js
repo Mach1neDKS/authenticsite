@@ -85,3 +85,25 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 });
+
+
+(function () {
+  const removeLoader = () => {
+    const loader = document.getElementById("page-loader");
+    if (!loader) return;
+
+    loader.classList.add("fade-out");
+
+    setTimeout(() => {
+      loader.remove();
+    }, 900);
+  };
+
+  // 🔒 FAILSAFE: fjern loader uanset hvad efter 4 sek
+  setTimeout(removeLoader, 4000);
+
+  // 🔓 Normal flow: fjern når DOM er klar
+  document.addEventListener("DOMContentLoaded", () => {
+    setTimeout(removeLoader, 2800);
+  });
+})();
