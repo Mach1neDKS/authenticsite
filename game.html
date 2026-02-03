@@ -9,7 +9,7 @@
         :root {
             --auth-blue: #00aaff;
             --police-blue: #02102b;
-            --police-yellow: #d4ff00; /* Dansk politi neon gul */
+            --police-yellow: #d4ff00;
             --road-grey: #1a1a1b;
         }
 
@@ -43,7 +43,6 @@
 
         canvas { width: 100%; height: 100%; display: block; background: var(--road-grey); }
 
-        /* UI Styling */
         .game-ui {
             position: absolute;
             top: 25px;
@@ -67,11 +66,10 @@
         .stat-label { color: var(--auth-blue); font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
         .stat-value { color: white; font-size: 1.4rem; font-weight: 900; display: block; }
 
-        /* Menuer */
         .overlay {
             position: absolute;
             inset: 0;
-            background: rgba(4, 8, 16, 0.9);
+            background: rgba(4, 8, 16, 0.95);
             backdrop-filter: blur(15px);
             display: flex;
             flex-direction: column;
@@ -87,9 +85,7 @@
         .overlay h1 span { color: var(--auth-blue); }
         .overlay p { color: rgba(255,255,255,0.6); margin: 15px 0 30px; line-height: 1.6; }
 
-        .btn-start {
-            background: var(--auth-blue);
-            color: white;
+        .btn-start, .btn-secondary {
             border: none;
             padding: 18px 50px;
             font-size: 1.1rem;
@@ -98,10 +94,23 @@
             cursor: pointer;
             transition: 0.3s;
             text-transform: uppercase;
+            margin: 5px;
+        }
+
+        .btn-start {
+            background: var(--auth-blue);
+            color: white;
             box-shadow: 0 10px 30px rgba(0, 170, 255, 0.4);
         }
 
         .btn-start:hover { transform: translateY(-5px); background: #33bbff; box-shadow: 0 15px 40px rgba(0, 170, 255, 0.6); }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 12px 30px;
+            font-size: 0.9rem;
+        }
 
         #wanted-level {
             position: absolute;
@@ -111,8 +120,19 @@
             color: #ff3333;
             font-weight: 900;
             font-size: 1.2rem;
-            text-shadow: 0 0 100px rgba(255,0,0,0.5);
         }
+
+        #leaderboard-list {
+            width: 100%;
+            max-width: 300px;
+            margin: 20px 0;
+            text-align: left;
+            border-collapse: collapse;
+        }
+
+        #leaderboard-list td { padding: 10px 5px; color: white; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        #leaderboard-list td.rank { color: var(--auth-blue); font-weight: 900; }
+        #leaderboard-list td.score { text-align: right; font-weight: 900; }
     </style>
 </head>
 <body>
@@ -138,11 +158,11 @@
     <div id="game-canvas-area">
         <div class="game-ui">
             <div class="stat-item">
-                <span class="stat-label">Distance</span>
+                <span class="stat-label">Score</span>
                 <span id="score" class="stat-value">0</span>
             </div>
             <div class="stat-item" style="text-align: right;">
-                <span class="stat-label">Rekord</span>
+                <span class="stat-label">Top</span>
                 <span id="highscore" class="stat-value">0</span>
             </div>
         </div>
@@ -151,18 +171,24 @@
 
         <div id="menu-start" class="overlay">
             <h1>AUTHENTIC<span>FLUGTEN</span></h1>
-            <p>Politiet har sat efter dig! Undvig patruljerne på E45 og skab dig et navn i Authentic City.</p>
+            <p>Undvig politiet på motorvejen. Ingen safe-zones her!</p>
             <button class="btn-start" onclick="initGame()">Start Flugten</button>
+            <button class="btn-secondary" onclick="toggleLeaderboard(true)">Leaderboard</button>
+        </div>
+
+        <div id="menu-leaderboard" class="overlay" style="display: none;">
+            <h1>TOP 10 <span>HELTE</span></h1>
+            <table id="leaderboard-list"></table>
+            <button class="btn-secondary" onclick="toggleLeaderboard(false)">Tilbage</button>
         </div>
 
         <div id="menu-over" class="overlay" style="display: none; opacity: 0;">
             <h1 style="color: #ff4444;">ANHOLDT</h1>
-            <p>Du blev fanget og din bil er beslaglagt.</p>
-            <div class="stat-item" style="margin-bottom: 30px;">
-                <span class="stat-label">Din Score</span>
+            <div class="stat-item" style="margin: 20px 0;">
                 <span id="final-score" class="stat-value">0</span>
             </div>
             <button class="btn-start" onclick="initGame()">Prøv Igen</button>
+            <button class="btn-secondary" onclick="toggleLeaderboard(true)">Leaderboard</button>
         </div>
 
         <canvas id="canvas"></canvas>
@@ -178,7 +204,6 @@
     
     let cW = canvas.width = 480;
     let cH = canvas.height = 800;
-
     let active = false;
     let score = 0;
     let highscore = localStorage.getItem('auth_top') || 0;
@@ -186,93 +211,88 @@
 
     let roadOffset = 0;
     let gameSpeed = 8;
-    let player = { x: 215, y: 650, w: 50, h: 90, dx: 0 };
+    let player = { x: 215, y: 650, w: 50, h: 90 };
     let enemies = [];
     let frame = 0;
-
     const keys = {};
+
     document.addEventListener('keydown', e => keys[e.code] = true);
     document.addEventListener('keyup', e => keys[e.code] = false);
 
+    // Leaderboard System
+    let leaderboard = JSON.parse(localStorage.getItem('auth_leaderboard')) || [];
+
+    function updateLeaderboard(finalScore) {
+        const isTopTen = leaderboard.length < 10 || finalScore > leaderboard[leaderboard.length - 1]?.score;
+        if (isTopTen && finalScore > 0) {
+            setTimeout(() => {
+                const name = prompt("TOP 10! Indtast dit navn (max 12 tegn):");
+                if (name) {
+                    leaderboard.push({ name: name.substring(0, 12), score: finalScore });
+                    leaderboard.sort((a, b) => b.score - a.score);
+                    leaderboard = leaderboard.slice(0, 10);
+                    localStorage.setItem('auth_leaderboard', JSON.stringify(leaderboard));
+                }
+            }, 500);
+        }
+    }
+
+    function renderLeaderboard() {
+        const list = document.getElementById('leaderboard-list');
+        list.innerHTML = leaderboard.map((e, i) => `
+            <tr><td class="rank">#${i + 1}</td><td>${e.name}</td><td class="score">${e.score}</td></tr>
+        `).join('');
+    }
+
+    function toggleLeaderboard(show) {
+        renderLeaderboard();
+        document.getElementById('menu-leaderboard').style.display = show ? 'flex' : 'none';
+        document.getElementById('menu-start').style.display = show ? 'none' : 'flex';
+        document.getElementById('menu-over').style.display = 'none';
+    }
+
     function drawDanishPolice(en) {
         ctx.fillStyle = '#02102b';
-        ctx.beginPath();
-        ctx.roundRect(en.x, en.y, en.w, en.h, 10);
-        ctx.fill();
-
+        ctx.beginPath(); ctx.roundRect(en.x, en.y, en.w, en.h, 10); ctx.fill();
         ctx.fillStyle = '#d4ff00';
-        ctx.fillRect(en.x, en.y + 25, 4, 40);
-        ctx.fillRect(en.x + en.w - 4, en.y + 25, 4, 40);
-
-        ctx.fillStyle = 'white';
-        ctx.font = 'bold 9px Inter';
-        ctx.textAlign = 'center';
-        ctx.fillText("POLITI", en.x + en.w/2, en.y + 50);
-
+        ctx.fillRect(en.x, en.y + 25, 4, 40); ctx.fillRect(en.x + en.w - 4, en.y + 25, 4, 40);
         let flash = Math.sin(Date.now() / 50) > 0;
-        ctx.shadowBlur = 15;
         ctx.fillStyle = flash ? '#0066ff' : '#002244';
-        ctx.shadowColor = '#0066ff';
         ctx.fillRect(en.x + 8, en.y + 2, 14, 6);
-        
         ctx.fillStyle = !flash ? '#0066ff' : '#002244';
         ctx.fillRect(en.x + 28, en.y + 2, 14, 6);
-        ctx.shadowBlur = 0;
     }
 
     function drawPlayer() {
-        ctx.shadowBlur = 20;
-        ctx.shadowColor = 'rgba(0, 170, 255, 0.5)';
+        ctx.shadowBlur = 15; ctx.shadowColor = 'rgba(0, 170, 255, 0.5)';
         ctx.fillStyle = '#00aaff';
-        ctx.beginPath();
-        ctx.roundRect(player.x, player.y, player.w, player.h, 10);
-        ctx.fill();
-        ctx.fillStyle = 'rgba(0,0,0,0.6)';
-        ctx.fillRect(player.x + 6, player.y + 15, player.w - 12, 20);
-        ctx.fillRect(player.x + 6, player.y + 55, player.w - 12, 15);
-        ctx.fillStyle = '#ff0000';
-        ctx.fillRect(player.x + 5, player.y + player.h - 5, 10, 3);
-        ctx.fillRect(player.x + player.w - 15, player.y + player.h - 5, 10, 3);
+        ctx.beginPath(); ctx.roundRect(player.x, player.y, player.w, player.h, 10); ctx.fill();
         ctx.shadowBlur = 0;
     }
 
     function drawRoad() {
         roadOffset = (roadOffset + gameSpeed) % 80;
-        ctx.fillStyle = '#1a1a1b';
-        ctx.fillRect(0,0,cW,cH);
-        ctx.fillStyle = '#333';
-        ctx.fillRect(20, 0, 5, cH);
-        ctx.fillRect(cW-25, 0, 5, cH);
-        ctx.strokeStyle = 'rgba(255,255,255,0.15)';
-        ctx.lineWidth = 4;
-        ctx.setLineDash([40, 40]);
-        ctx.lineDashOffset = -roadOffset;
-        [cW*0.25, cW*0.5, cW*0.75].forEach(x => {
-            ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, cH); ctx.stroke();
-        });
+        ctx.fillStyle = '#1a1a1b'; ctx.fillRect(0,0,cW,cH);
+        ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.lineWidth = 4; ctx.setLineDash([40, 40]); ctx.lineDashOffset = -roadOffset;
+        [cW*0.25, cW*0.5, cW*0.75].forEach(x => { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, cH); ctx.stroke(); });
     }
 
     function update() {
         if(!active) return;
         frame++;
-        
-        if(keys['ArrowLeft'] || keys['KeyA']) player.x -= 8.5;
-        if(keys['ArrowRight'] || keys['KeyD']) player.x += 8.5;
-        player.x = Math.max(30, Math.min(cW - 80, player.x));
+        if(keys['ArrowLeft'] || keys['KeyA']) player.x -= 8;
+        if(keys['ArrowRight'] || keys['KeyD']) player.x += 8;
+        player.x = Math.max(25, Math.min(cW - 75, player.x));
 
-        if(frame % 500 === 0) gameSpeed += 0.8;
-        let wanted = Math.floor(gameSpeed / 4);
-        wantedEl.innerText = "★".repeat(Math.min(5, wanted));
+        if(frame % 500 === 0) gameSpeed += 0.5;
+        wantedEl.innerText = "★".repeat(Math.min(5, Math.floor(gameSpeed / 4)));
 
-        if(frame % Math.max(25, 70 - Math.floor(gameSpeed)) === 0) {
-            // FIX: Justerede baner for at fjerne "Safe spot" i midten
-            const lanes = [cW*0.15, cW*0.41, cW*0.59, cW*0.85];
-            const baseLane = lanes[Math.floor(Math.random()*lanes.length)];
-            // Tilføjer 5-10px tilfældig slingren så de ikke spawner identisk hver gang
-            const drift = (Math.random() - 0.5) * 15; 
-            
+        if(frame % Math.max(30, 70 - Math.floor(gameSpeed)) === 0) {
+            // FIX: Banerne er rykket ind (0.42 og 0.58), så hullet er mindre end spillerens bil
+            const lanes = [cW*0.15, cW*0.42, cW*0.58, cW*0.85];
+            const drift = (Math.random() - 0.5) * 20; // Gør det umuligt at forudsige midten
             enemies.push({
-                x: baseLane - 25 + drift,
+                x: lanes[Math.floor(Math.random()*lanes.length)] - 25 + drift,
                 y: -120, w: 50, h: 90,
                 speed: gameSpeed * 0.7 + Math.random() * 3
             });
@@ -281,56 +301,31 @@
         enemies.forEach((en, i) => {
             en.y += en.speed;
             drawDanishPolice(en);
-
-            // FIX: Forbedret collision box (hitbox) for at gøre det sværere at snige sig igennem
-            if(player.x < en.x + en.w - 2 && player.x + player.w - 2 > en.x &&
-               player.y < en.y + en.h - 5 && player.y + player.h - 5 > en.y) {
-                gameOver();
-            }
-
-            if(en.y > cH) {
-                enemies.splice(i, 1);
-                score += 10;
-                scoreEl.innerText = score;
-            }
+            if(player.x < en.x + en.w - 4 && player.x + player.w - 4 > en.x &&
+               player.y < en.y + en.h - 5 && player.y + player.h - 5 > en.y) gameOver();
+            if(en.y > cH) { enemies.splice(i, 1); score += 10; scoreEl.innerText = score; }
         });
     }
 
-    function loop() {
-        drawRoad();
-        update();
-        if(active) drawPlayer();
-        requestAnimationFrame(loop);
-    }
+    function loop() { drawRoad(); update(); if(active) drawPlayer(); requestAnimationFrame(loop); }
 
     function initGame() {
-        active = true;
-        score = 0;
-        gameSpeed = 8;
-        frame = 0;
-        enemies = [];
-        player.x = 215;
+        active = true; score = 0; gameSpeed = 8; frame = 0; enemies = []; player.x = 215;
         scoreEl.innerText = "0";
-        document.getElementById('menu-start').style.display = 'none';
-        document.getElementById('menu-over').style.display = 'none';
-        document.getElementById('menu-over').style.opacity = '0';
+        document.querySelectorAll('.overlay').forEach(el => el.style.display = 'none');
     }
 
     function gameOver() {
         active = false;
-        if(score > highscore) {
-            highscore = score;
-            localStorage.setItem('auth_top', highscore);
-            highscoreEl.innerText = highscore;
-        }
+        if(score > highscore) { highscore = score; localStorage.setItem('auth_top', highscore); highscoreEl.innerText = highscore; }
         document.getElementById('final-score').innerText = score;
         const over = document.getElementById('menu-over');
-        over.style.display = 'flex';
-        setTimeout(() => over.style.opacity = '1', 50);
+        over.style.display = 'flex'; setTimeout(() => over.style.opacity = '1', 50);
+        updateLeaderboard(score);
     }
 
+    renderLeaderboard();
     loop();
 </script>
-<script src="script.js"></script>
 </body>
 </html>
