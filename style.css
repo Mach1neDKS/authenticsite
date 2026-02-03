@@ -2,6 +2,17 @@
 
 /* ===== LOADER ===== */
 
+ul, ol {
+  list-style: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+li {
+  margin: 0;
+  padding: 0;
+}
+
 #page-loader {
   position: fixed;
   inset: 0;
@@ -137,6 +148,37 @@ body{
 }
 
 .center-page{text-align:center}
+
+/* PAGE FADE */
+body { opacity: 0; animation: pageFadeIn .8s ease forwards; }
+body.fade-out { opacity: 0; transition: opacity .6s ease; }
+
+@keyframes pageFadeIn {
+  from { opacity: 0 }
+  to { opacity: 1 }
+}
+
+
+/* =====================
+   CINEMATIC SCROLL REVEAL
+   ===================== */
+.reveal {
+  opacity: 0;
+  transform: translateY(80px) scale(0.96);
+  filter: blur(12px);
+  transition:
+    opacity 1.1s cubic-bezier(.19,1,.22,1),
+    transform 1.1s cubic-bezier(.19,1,.22,1),
+    filter 1.1s cubic-bezier(.19,1,.22,1);
+  will-change: transform, opacity, filter;
+}
+
+.reveal.active {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0);
+}
+
 
 /* =====================
    NAVBAR
@@ -440,3 +482,67 @@ footer{
   position: relative;
   z-index: 5;
 }
+
+/* =====================
+   SECTION DIVIDER – DIAGONAL PREMIUM
+   ===================== */
+.section-divider.diagonal {
+  position: relative;
+  display: block;
+  animation: dividerGlow 6s ease-in-out infinite;
+  width: 100%;
+  height: 2px;                 /* lidt tykkere = mere presence */
+  margin: 140px 0;
+
+.section-divider.diagonal::after {
+  content:"";
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:60px;
+  height:2px;
+  background:rgba(255,255,255,.35);
+  transform:translate(-50%,-50%);
+}
+
+
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(106,227,255,0.35),
+    rgba(45,124,255,0.85),
+    rgba(106,227,255,0.35),
+    transparent
+  );
+
+  transform: rotate(-1.2deg);
+  opacity: 0.9;
+
+  /* premium depth */
+  box-shadow:
+    0 0 18px rgba(45,124,255,0.45),
+    0 0 40px rgba(45,124,255,0.15);
+}
+
+/* GØR DEN IMMUN OVER FOR REVEAL */
+.section-divider.diagonal.reveal {
+  opacity: 0.9 !important;
+  filter: none !important;
+}
+
+/* =====================
+   DIVIDER GLOW ANIMATION
+   ===================== */
+@keyframes dividerGlow {
+  0%, 100% { opacity: .75; }
+  50% { opacity: 1; }
+}
+
+
+
+
+
+
+
+
+
