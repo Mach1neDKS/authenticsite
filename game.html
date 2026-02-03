@@ -111,7 +111,7 @@
             color: #ff3333;
             font-weight: 900;
             font-size: 1.2rem;
-            text-shadow: 0 0 10px rgba(255,0,0,0.5);
+            text-shadow: 0 0 100px rgba(255,0,0,0.5);
         }
     </style>
 </head>
@@ -195,77 +195,58 @@
     document.addEventListener('keyup', e => keys[e.code] = false);
 
     function drawDanishPolice(en) {
-        // Bil krop
         ctx.fillStyle = '#02102b';
         ctx.beginPath();
         ctx.roundRect(en.x, en.y, en.w, en.h, 10);
         ctx.fill();
 
-        // Gule reflekser (Battenburg)
         ctx.fillStyle = '#d4ff00';
-        ctx.fillRect(en.x, en.y + 25, 4, 40); // Venstre side
-        ctx.fillRect(en.x + en.w - 4, en.y + 25, 4, 40); // Højre side
+        ctx.fillRect(en.x, en.y + 25, 4, 40);
+        ctx.fillRect(en.x + en.w - 4, en.y + 25, 4, 40);
 
-        // Tag tekst
         ctx.fillStyle = 'white';
         ctx.font = 'bold 9px Inter';
         ctx.textAlign = 'center';
         ctx.fillText("POLITI", en.x + en.w/2, en.y + 50);
 
-        // Blinking Sirens
         let flash = Math.sin(Date.now() / 50) > 0;
         ctx.shadowBlur = 15;
         ctx.fillStyle = flash ? '#0066ff' : '#002244';
         ctx.shadowColor = '#0066ff';
-        ctx.fillRect(en.x + 8, en.y + 2, 14, 6); // Venstre blå
+        ctx.fillRect(en.x + 8, en.y + 2, 14, 6);
         
         ctx.fillStyle = !flash ? '#0066ff' : '#002244';
-        ctx.fillRect(en.x + 28, en.y + 2, 14, 6); // Højre blå
+        ctx.fillRect(en.x + 28, en.y + 2, 14, 6);
         ctx.shadowBlur = 0;
     }
 
     function drawPlayer() {
-        // Glow effect
         ctx.shadowBlur = 20;
         ctx.shadowColor = 'rgba(0, 170, 255, 0.5)';
-        
-        // Car Body
         ctx.fillStyle = '#00aaff';
         ctx.beginPath();
         ctx.roundRect(player.x, player.y, player.w, player.h, 10);
         ctx.fill();
-        
-        // Windows
         ctx.fillStyle = 'rgba(0,0,0,0.6)';
-        ctx.fillRect(player.x + 6, player.y + 15, player.w - 12, 20); // Front
-        ctx.fillRect(player.x + 6, player.y + 55, player.w - 12, 15); // Back
-        
-        // Tail lights
+        ctx.fillRect(player.x + 6, player.y + 15, player.w - 12, 20);
+        ctx.fillRect(player.x + 6, player.y + 55, player.w - 12, 15);
         ctx.fillStyle = '#ff0000';
         ctx.fillRect(player.x + 5, player.y + player.h - 5, 10, 3);
         ctx.fillRect(player.x + player.w - 15, player.y + player.h - 5, 10, 3);
-        
         ctx.shadowBlur = 0;
     }
 
     function drawRoad() {
         roadOffset = (roadOffset + gameSpeed) % 80;
-        
-        // Road surface
         ctx.fillStyle = '#1a1a1b';
         ctx.fillRect(0,0,cW,cH);
-        
-        // Side lines
         ctx.fillStyle = '#333';
         ctx.fillRect(20, 0, 5, cH);
         ctx.fillRect(cW-25, 0, 5, cH);
-        
-        // Center dashes (Danish motorway style)
         ctx.strokeStyle = 'rgba(255,255,255,0.15)';
         ctx.lineWidth = 4;
         ctx.setLineDash([40, 40]);
         ctx.lineDashOffset = -roadOffset;
-        
         [cW*0.25, cW*0.5, cW*0.75].forEach(x => {
             ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, cH); ctx.stroke();
         });
@@ -275,33 +256,34 @@
         if(!active) return;
         frame++;
         
-        // Movement
-        if(keys['ArrowLeft'] || keys['KeyA']) player.x -= 8;
-        if(keys['ArrowRight'] || keys['KeyD']) player.x += 8;
+        if(keys['ArrowLeft'] || keys['KeyA']) player.x -= 8.5;
+        if(keys['ArrowRight'] || keys['KeyD']) player.x += 8.5;
         player.x = Math.max(30, Math.min(cW - 80, player.x));
 
-        // Difficulty & Wanted Level
         if(frame % 500 === 0) gameSpeed += 0.8;
         let wanted = Math.floor(gameSpeed / 4);
         wantedEl.innerText = "★".repeat(Math.min(5, wanted));
 
-        // Spawn logic
-        if(frame % Math.max(30, 70 - Math.floor(gameSpeed)) === 0) {
-            const lanes = [cW*0.12, cW*0.37, cW*0.62, cW*0.87];
+        if(frame % Math.max(25, 70 - Math.floor(gameSpeed)) === 0) {
+            // FIX: Justerede baner for at fjerne "Safe spot" i midten
+            const lanes = [cW*0.15, cW*0.41, cW*0.59, cW*0.85];
+            const baseLane = lanes[Math.floor(Math.random()*lanes.length)];
+            // Tilføjer 5-10px tilfældig slingren så de ikke spawner identisk hver gang
+            const drift = (Math.random() - 0.5) * 15; 
+            
             enemies.push({
-                x: lanes[Math.floor(Math.random()*lanes.length)] - 25,
+                x: baseLane - 25 + drift,
                 y: -120, w: 50, h: 90,
                 speed: gameSpeed * 0.7 + Math.random() * 3
             });
         }
 
-        // Enemy loop
         enemies.forEach((en, i) => {
             en.y += en.speed;
             drawDanishPolice(en);
 
-            // Collision
-            if(player.x < en.x + en.w - 5 && player.x + player.w - 5 > en.x &&
+            // FIX: Forbedret collision box (hitbox) for at gøre det sværere at snige sig igennem
+            if(player.x < en.x + en.w - 2 && player.x + player.w - 2 > en.x &&
                player.y < en.y + en.h - 5 && player.y + player.h - 5 > en.y) {
                 gameOver();
             }
@@ -349,7 +331,6 @@
 
     loop();
 </script>
-
 <script src="script.js"></script>
 </body>
 </html>
