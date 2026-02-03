@@ -1,85 +1,87 @@
-/* ===========================
-   AUTHENTIC RP – script.js
-   =========================== */
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".allowlist-form").forEach(form => {
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
 
-window.addEventListener("load", () => {
-  /* ---------- Loader ---------- */
-  const loader = document.getElementById("loader");
-  if (loader) {
-    loader.style.display = "none";
-  }
+      const webhook = form.dataset.webhook;
+      if (!webhook) return alert("Webhook mangler!");
 
-  /* ---------- Allowlist Form ---------- */
-  const form = document.querySelector(".allowlist-form");
+      const appId = Math.random().toString(36).substring(2, 8).toUpperCase();
 
-  if (!form) return;
+      const fields = [...form.querySelectorAll("textarea")];
+      const labels = [
+        "Discord navn & ID (inkl. User ID)",
+        "Alder",
+        "FiveM erfaring",
+        "Tidligere RP erfaring",
+        "Seriøs RP forståelse",
+        "Eksempel på god RP",
+        "Eksempel på dårlig RP",
+        "IC vs OOC",
+        "Konflikthåndtering",
+        "Regelforståelse",
+        "Motivation for rollen",
+        "Bidrag til serveren"
+      ];
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
+      let description = "";
+      fields.forEach((field, i) => {
+        description += `**${labels[i] || "Spørgsmål"}**\n\`${field.value}\`\n\n`;
+      });
 
-    /* 🔴 INDSÆT DIN DISCORD WEBHOOK HER */
-    const WEBHOOK_URL = "https://discord.com/api/webhooks/1467947911878021214/6dNvDkEgEfvbmaEYo_ifUfOmjqBnso0M5mjOUAueVVaf3SClPcOxKs7Jv_eIQUbLWYdx";
-
-    const questions = [
-      "Hvad betyder seriøs roleplay for dig, og hvorfor er det vigtigt på en RP-server?",
-      "Beskriv en god, realistisk RP-situation du selv kunne forestille dig at spille.",
-      "Beskriv en dårlig RP-situation og forklar hvorfor den er dårlig.",
-      "Hvilken type karakter ønsker du at spille? (Baggrund, personlighed, styrker/svagheder)",
-      "Hvordan adskiller du in-character (IC) og out-of-character (OOC)?",
-      "Hvordan håndterer du konflikter i RP, fx hvis en situation ikke går som forventet?",
-      "Hvordan vil du reagere, hvis en staff-medarbejder stopper din RP-situation?",
-      "Har du tidligere erfaring med seriøs RP? Hvis ja, hvor og i hvor lang tid?",
-      "Hvad forventer du af Authentic RP som server og community?",
-      "Hvorfor har du valgt at ansøge netop hos Authentic RP frem for andre servere?",
-      "Hvordan kan du bidrage positivt til Authentic RP og dets community?",
-      "Er der noget andet, du mener staff bør vide om dig som spiller?"
-    ];
-
-    const answers = [...form.querySelectorAll("textarea")].map(t =>
-      t.value.trim()
-    );
-
-    /* ---------- Saml tekst ---------- */
-    let fullText = questions
-      .map((q, i) => `**${i + 1}. ${q}**\n${answers[i] || "—"}`)
-      .join("\n\n");
-
-    /* ---------- Discord limit handling ---------- */
-    const MAX_LENGTH = 3900;
-    const chunks = [];
-
-    while (fullText.length > 0) {
-      chunks.push(fullText.substring(0, MAX_LENGTH));
-      fullText = fullText.substring(MAX_LENGTH);
-    }
-
-    /* ---------- Send til Discord ---------- */
-    try {
-      for (let i = 0; i < chunks.length; i++) {
-        await fetch(WEBHOOK_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            content: i === 0 ? "📥 **Ny Allowlist Ansøgning – Authentic RP**" : null,
-            embeds: [
-              {
-                description: chunks[i],
-                color: 3447003,
-                timestamp: new Date()
-              }
-            ]
-          })
-        });
+      if (description.length > 3800) {
+        description = description.slice(0, 3800) + "\n\n*(Forkortet)*";
       }
 
-      alert("✅ Din allowlist-ansøgning er sendt. Tak for din tid!");
-      form.reset();
+      const userIdMatch = fields[0]?.value.match(/(\d{17,20})/);
+      const discordUserId = userIdMatch ? userIdMatch[1] : "";
 
-    } catch (error) {
-      console.error(error);
-      alert("❌ Noget gik galt. Prøv igen senere.");
-    }
+      const payload = {
+        embeds: [{
+          title: "📥 Ny Ansøgning – Authentic RP",
+          description,
+          color: 3447003,
+          fields: [
+            { name: "📌 Status", value: "⏳ Afventer", inline: true },
+            { name: "🆔 Ansøgnings ID", value: appId, inline: true }
+          ],
+          footer: { text: "Authentic RP • Ansøgningssystem" },
+          timestamp: new Date().toISOString()
+        }],
+        components: [
+          {
+            type: 1,
+            components: [
+              {
+                type: 2,
+                label: "Godkend",
+                style: 3,
+                custom_id: `approve:${appId}:${discordUserId}`
+              },
+              {
+                type: 2,
+                label: "Afvis",
+                style: 4,
+                custom_id: `deny:${appId}:${discordUserId}`
+              }
+            ]
+          }
+        ]
+      };
+
+      try {
+        await fetch(webhook, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        alert(`Ansøgning sendt!\nID: ${appId}`);
+        form.reset();
+      } catch (err) {
+        console.error(err);
+        alert("Kunne ikke sende ansøgning.");
+      }
+    });
   });
 });

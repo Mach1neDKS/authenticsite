@@ -4,38 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Authentic RP</title>
-<link rel="icon" href="assets/logo.png">
 <link rel="stylesheet" href="style.css">
-<script defer src="script.js"></script>
 </head>
 <body>
 
-<!-- ===== PREMIUM LOADER ===== -->
-<div id="page-loader">
-  <div class="loader-overlay"></div>
-
-  <div class="loader-wrapper">
-    <img src="assets/logo.png" alt="Authentic RP Logo" class="loader-logo">
-    <div class="loader-line"></div>
-    <span class="loader-text">AUTHENTIC ROLEPLAY</span>
-  </div>
-</div>
-
-
-<script>
-document.body.style.overflow = "hidden";
-
-window.addEventListener("load", () => {
-  const loader = document.getElementById("page-loader");
-
-  setTimeout(() => {
-    loader.classList.add("hide");
-    document.body.style.overflow = "";
-  }, 1200); // cinematic delay
-});
-</script>
-<div class="layout">
-
+<!-- NAV -->
 <nav class="nav">
   <div class="nav-inner">
     <div class="nav-brand">
@@ -44,37 +17,76 @@ window.addEventListener("load", () => {
     </div>
     <div class="nav-links">
       <a href="index.html" class="active">Home</a>
-      <a href="#status">Server Status</a>
-      <a href="allowlist.html">Allowlist</a>
+      <a href="applications.html">Ansøgninger</a>
       <a href="staff.html">Staff</a>
       <a href="https://discord.gg/authentic2026" target="_blank" class="btn-discord">Join Discord</a>
     </div>
   </div>
 </nav>
 
-<main class="content">
+<!-- HERO -->
+<section class="hero">
+  <img src="assets/logo.png" class="hero-logo" alt="Authentic RP">
 
-<header class="hero">
-  <img class="hero-logo" src="assets/logo.png">
-  <h1>AUTHENTIC ROLEPLAY</h1>
-  <p>Elite FiveM Roleplay · Seriøs RP</p>
-  <a class="btn-primary" href="allowlist.html">Ansøg om Allowlist</a>
-</header>
+  <h1>AUTHENTIC RP</h1>
+  <p class="page-sub">
+    En seriøs FiveM roleplay server bygget på kvalitet, realisme og et stærkt community.
+    <br>Her spiller handlinger en rolle.
+  </p>
 
-<section id="status" class="section">
-  <h2>Live Server Status</h2>
-  <div class="status-card">
-    <span class="status-dot online"></span>
-    <strong>ONLINE · Join via FiveM</strong>
+  <div class="center-actions">
+    <a href="applications.html" class="btn-primary">Ansøgninger</a>
+    <a href="https://discord.gg/authentic2026" target="_blank" class="btn-secondary">Join Discord</a>
   </div>
 </section>
 
-</main>
+<!-- TRUST / FEATURES -->
+<section class="section">
+  <div class="staff-grid">
 
+    <div class="staff-card">
+      <h3>Seriøs Roleplay</h3>
+      <p>
+        Authentic RP er bygget til spillere der værdsætter realisme, konsekvenser og
+        sammenhængende historier frem for kaos.
+      </p>
+    </div>
+
+    <div class="staff-card">
+      <h3>Aktivt Staff Team</h3>
+      <p>
+        Vores staff-team består af erfarne spillere, der sikrer fair behandling,
+        høj kvalitet og hurtig support.
+      </p>
+    </div>
+
+    <div class="staff-card">
+      <h3>Stærkt Community</h3>
+      <p>
+        Et modent community med fokus på respekt, samarbejde og langvarige relationer
+        – både IC og OOC.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="section center-page">
+  <h2 class="page-title">Klar til at starte din historie?</h2>
+  <p class="page-sub">
+    Ansøg i dag og bliv en del af et roleplay-miljø hvor kvalitet altid kommer først.
+  </p>
+
+  <div class="center-actions">
+    <a href="applications.html" class="btn-primary">Gå til Ansøgninger</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
 <footer>
-  <p>© Authentic RP</p>
+  <p>© Authentic RP – Alle rettigheder forbeholdes</p>
 </footer>
 
-</div>
 </body>
 </html>
