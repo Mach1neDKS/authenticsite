@@ -8,7 +8,8 @@
         @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@600;700&family=Inter:wght@400;900&display=swap');
 
         :root {
-            --fivem-orange: #00aaff;
+            --auth-blue: #00aaff; /* Logo/UI Blå */
+            --player-car: #ffab00; /* DIN BIL FARVE (ORANGE) */
             --police-blue: #0b1a3a;
             --police-yellow: #d4ff00;
             --danger: #ff3333;
@@ -34,7 +35,7 @@
             border-radius: 15px;
             overflow: hidden;
             border: 3px solid #1a1a1b;
-            box-shadow: 0 0 50px rgba(0,0,0,1);
+            box-shadow: 0 0 50px rgba(0, 170, 255, 0.15);
         }
 
         canvas { display: block; width: 100%; height: 100%; }
@@ -54,7 +55,7 @@
         .hud-card {
             background: rgba(0, 0, 0, 0.9);
             padding: 10px 15px;
-            border-right: 4px solid var(--fivem-orange);
+            border-right: 4px solid var(--auth-blue);
             text-align: right;
             backdrop-filter: blur(10px);
         }
@@ -66,7 +67,7 @@
         .overlay {
             position: absolute;
             inset: 0;
-            background: radial-gradient(circle, rgba(15, 25, 40, 0.98), #000);
+            background: radial-gradient(circle, rgba(10, 20, 40, 0.98), #000);
             z-index: 100;
             display: flex;
             flex-direction: column;
@@ -77,7 +78,7 @@
         }
 
         .brand h1 { font-family: 'Oswald', sans-serif; font-size: 3rem; font-style: italic; margin: 0; text-transform: uppercase; }
-        .brand span { color: var(--fivem-orange); }
+        .brand span { color: var(--auth-blue); }
 
         .leaderboard {
             width: 100%;
@@ -85,12 +86,14 @@
             background: rgba(255,255,255,0.02);
             border: 1px solid rgba(255,255,255,0.05);
             border-radius: 4px;
+            max-height: 300px;
+            overflow-y: auto;
         }
 
         .lb-row { display: flex; justify-content: space-between; padding: 10px 15px; border-bottom: 1px solid rgba(255,255,255,0.02); font-size: 14px; }
 
         .btn {
-            background: var(--fivem-orange);
+            background: var(--auth-blue);
             color: #000;
             border: none;
             padding: 16px 40px;
@@ -103,35 +106,34 @@
             margin: 5px;
             width: 80%;
         }
-        .btn:hover { background: #fff; transform: scale(1.05); }
-        .btn-alt { background: #444; color: white; }
+        .btn:hover { background: #fff; transform: scale(1.02); }
+        .btn-alt { background: #333; color: white; }
 
-        /* GAME OVER SCREEN */
-        #game-over { display: none; z-index: 110; background: rgba(0,0,0,0.9); }
-        .result-score { font-size: 4rem; font-family: 'Oswald', sans-serif; color: var(--fivem-orange); margin: 0; }
+        #game-over { display: none; z-index: 110; background: rgba(0,0,0,0.95); }
+        .result-score { font-size: 4rem; font-family: 'Oswald', sans-serif; color: var(--auth-blue); margin: 0; }
     </style>
 </head>
 <body>
 
 <div id="viewport">
     <div class="hud">
-        <div class="hud-card"><span class="hud-label">Eftersøgt</span><div id="stars" style="color:var(--fivem-orange)">★★</div></div>
+        <div class="hud-card"><span class="hud-label">Efterlysning</span><div id="stars" style="color:var(--auth-blue)">★★</div></div>
         <div class="hud-card"><span class="hud-label">Score</span><span id="score-val" class="hud-val">0</span></div>
     </div>
 
     <div id="main-menu" class="overlay">
         <div class="brand"><h1>AUTHENTIC<span> RP</span></h1></div>
-        <p style="letter-spacing: 5px; font-size: 10px; color: #555; margin-bottom: 20px;">AUTHENTIC RANGLISTE</p>
+        <p style="letter-spacing: 5px; font-size: 10px; color: #555; margin-bottom: 20px;">POLITIETS RANGSISTE</p>
         <div class="leaderboard" id="lb-content">Henter rankings...</div>
         <button class="btn" onclick="startGame()">Start Flugten</button>
     </div>
 
     <div id="game-over" class="overlay">
-        <h2 style="font-family:'Oswald'; letter-spacing:10px; color:var(--danger); margin:0;">Anholdt</h2>
+        <h2 style="font-family:'Oswald'; letter-spacing:10px; color:var(--danger); margin:0;">ST STANDSET</h2>
         <p class="hud-label">Din score blev:</p>
         <h1 id="final-score" class="result-score">0</h1>
         <button class="btn" onclick="promptSaveScore()">Gem på Leaderboard</button>
-        <button class="btn btn-alt" onclick="startGame()">Prøv igen nu</button>
+        <button class="btn btn-alt" onclick="startGame()">Prøv igen</button>
         <button class="btn btn-alt" style="font-size:0.8rem" onclick="showMenu()">Tilbage til menu</button>
     </div>
 
@@ -144,8 +146,9 @@
     canvas.width = 440;
     canvas.height = 800;
 
-    const BIN_URL = "https://api.jsonbin.io/v3/b/67a151b7e41b4d34e4835c60";
-    const API_KEY = "$2a$10$O9lO6CAsT4tVp9FvY.FvyeD8UoV2/WlR8j9P.TfK5WlO9FvyeD8Uo";
+    // DIN DATABASE INFO (Tjek om disse stadig virker på jsonbin.io)
+    const BIN_URL = "https://api.jsonbin.io/v3/b/69828440d0ea881f409e9cd4";
+    const API_KEY = "$2a$10$DdEgWThNcqjJ.CpxiKG7eeZb6CPpcBaDtxs33z5KfPusmt.IC89si";
 
     let active = false;
     let score = 0;
@@ -155,36 +158,59 @@
     let enemies = [];
     const keys = {};
 
-    // CLOUD FUNKTIONER
+    // --- LEADERBOARD SYSTEM ---
     async function loadLeaderboard() {
+        const lbBox = document.getElementById('lb-content');
         try {
-            const r = await fetch(BIN_URL + "/latest", { headers: { "X-Master-Key": API_KEY } });
+            const r = await fetch(BIN_URL + "/latest", { 
+                headers: { "X-Master-Key": API_KEY } 
+            });
+            if (!r.ok) throw new Error("API Fejl");
+            
             const d = await r.json();
             const s = d.record.scores || [];
-            document.getElementById('lb-content').innerHTML = s.map((x, i) => `
-                <div class="lb-row"><span><b>#${i+1}</b> ${x.name}</span><b>${x.score}</b></div>
-            `).join('');
-        } catch(e) { document.getElementById('lb-content').innerHTML = "Fejl ved indlæsning..."; }
-    }
-
-    async function promptSaveScore() {
-        const name = prompt("Indtast dit navn for at gemme din score på " + score + ":");
-        if(name && name.trim().length > 0) {
-            document.getElementById('lb-content').innerHTML = "Gemmer...";
-            let current = await (await fetch(BIN_URL + "/latest", { headers: { "X-Master-Key": API_KEY } })).json();
-            let list = current.record.scores || [];
-            list.push({ name: name.substring(0, 15), score: score });
-            list.sort((a,b) => b.score - a.score);
-            await fetch(BIN_URL, {
-                method: 'PUT',
-                headers: { "Content-Type": "application/json", "X-Master-Key": API_KEY },
-                body: JSON.stringify({ scores: list.slice(0, 8) })
-            });
-            showMenu();
+            displayScores(s);
+        } catch(e) {
+            console.error("Leaderboard fejl:", e);
+            lbBox.innerHTML = "<div style='padding:10px; color:#ff4444; font-size:12px;'>KUNNE IKKE FORBINDE TIL SKYEN<br>Tjek din API nøgle eller internet.</div>";
         }
     }
 
-    // GAME LOGIK
+    function displayScores(s) {
+        document.getElementById('lb-content').innerHTML = s.map((x, i) => `
+            <div class="lb-row"><span><b>#${i+1}</b> ${x.name}</span><b>${x.score}</b></div>
+        `).join('') || "<div style='padding:10px'>Ingen scores endnu</div>";
+    }
+
+    async function promptSaveScore() {
+        const name = prompt("Indtast dit RP navn:");
+        if(name && name.trim().length > 0) {
+            document.getElementById('lb-content').innerHTML = "Gemmer på skyen...";
+            try {
+                // Hent først
+                let res = await fetch(BIN_URL + "/latest", { headers: { "X-Master-Key": API_KEY } });
+                let current = await res.json();
+                let list = current.record.scores || [];
+                
+                // Tilføj ny
+                list.push({ name: name.substring(0, 15), score: score });
+                list.sort((a,b) => b.score - a.score);
+                
+                // Gem tilbage
+                await fetch(BIN_URL, {
+                    method: 'PUT',
+                    headers: { "Content-Type": "application/json", "X-Master-Key": API_KEY },
+                    body: JSON.stringify({ scores: list.slice(0, 10) })
+                });
+                showMenu();
+            } catch(e) {
+                alert("Kunne ikke gemme scoren. Tjek API forbindelsen.");
+                showMenu();
+            }
+        }
+    }
+
+    // --- SPIL LOGIK ---
     window.onkeydown = e => keys[e.code] = true;
     window.onkeyup = e => keys[e.code] = false;
 
@@ -194,8 +220,6 @@
         ctx.fillStyle = '#d4ff00';
         ctx.fillRect(en.x, en.y + 20, 3, 45);
         ctx.fillRect(en.x + en.w - 3, en.y + 20, 3, 45);
-        
-        // Blink
         let flash = Math.sin(Date.now() / 60) > 0;
         ctx.fillStyle = flash ? '#007bff' : '#ff0000';
         ctx.shadowBlur = 15; ctx.shadowColor = ctx.fillStyle;
@@ -211,7 +235,7 @@
         if(keys['ArrowRight'] || keys['KeyD']) player.x += 7;
         player.x = Math.max(20, Math.min(370, player.x));
 
-        gameSpeed += 0.0015;
+        gameSpeed += 0.0012;
         document.getElementById('stars').innerText = "★".repeat(Math.min(5, Math.floor(gameSpeed/3.5)));
 
         if(frame % Math.max(25, 65 - Math.floor(gameSpeed)) === 0) {
@@ -224,7 +248,9 @@
             drawPolice(en);
             if(player.x < en.x + en.w - 5 && player.x + player.w - 5 > en.x &&
                player.y < en.y + en.h - 5 && player.y + player.h - 5 > en.y) {
-                gameOver();
+                active = false;
+                document.getElementById('final-score').innerText = score;
+                document.getElementById('game-over').style.display = 'flex';
             }
             if(en.y > 800) { enemies.splice(i,1); score += 10; document.getElementById('score-val').innerText = score; }
         });
@@ -237,12 +263,6 @@
         document.getElementById('score-val').innerText = "0";
     }
 
-    function gameOver() {
-        active = false;
-        document.getElementById('final-score').innerText = score;
-        document.getElementById('game-over').style.display = 'flex';
-    }
-
     function showMenu() {
         document.getElementById('game-over').style.display = 'none';
         document.getElementById('main-menu').style.display = 'flex';
@@ -250,17 +270,16 @@
     }
 
     function loop() {
-        ctx.fillStyle = '#151515'; ctx.fillRect(0,0,440,800);
+        ctx.fillStyle = '#111'; ctx.fillRect(0,0,440,800);
         ctx.strokeStyle = 'rgba(255,255,255,0.05)';
         ctx.setLineDash([40, 40]); ctx.lineDashOffset = -(frame * gameSpeed);
         [146, 292].forEach(x => { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 800); ctx.stroke(); });
 
         update();
         if(active) { 
-            ctx.fillStyle = '#00aaff'; 
-            ctx.shadowBlur = 10; ctx.shadowColor = 'rgba(255,171,0,0.5)';
+            // HER BRUGER VI FARVEN FRA CSS VARIBLEN
+            ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--player-car');
             ctx.beginPath(); ctx.roundRect(player.x, player.y, player.w, player.h, 8); ctx.fill(); 
-            ctx.shadowBlur = 0;
         }
         requestAnimationFrame(loop);
     }
