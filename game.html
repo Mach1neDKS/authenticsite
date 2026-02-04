@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Authentic RP | High Speed Pursuit</title>
+    <link rel="stylesheet" href="style.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@600;700&family=Inter:wght@400;900&display=swap');
 
         :root {
-            --auth-blue: #00aaff; /* Logo/UI Blå */
-            --player-car: #ffab00; /* DIN BIL FARVE (ORANGE) */
+            --auth-blue: #00aaff;
+            --player-car: #ffab00;
             --police-blue: #0b1a3a;
             --police-yellow: #d4ff00;
             --danger: #ff3333;
@@ -20,17 +21,27 @@
             margin: 0;
             font-family: 'Inter', sans-serif;
             color: white;
-            overflow: hidden;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column; /* Giver plads til nav øverst */
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Container til spillet for at adskille det fra nav */
+        .game-container {
+            flex-grow: 1;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            padding: 20px 0;
+            width: 100%;
         }
 
         #viewport {
             position: relative;
             width: 440px;
-            height: 85vh;
+            height: 80vh;
             background: #111;
             border-radius: 15px;
             overflow: hidden;
@@ -86,7 +97,7 @@
             background: rgba(255,255,255,0.02);
             border: 1px solid rgba(255,255,255,0.05);
             border-radius: 4px;
-            max-height: 300px;
+            max-height: 250px;
             overflow-y: auto;
         }
 
@@ -115,29 +126,48 @@
 </head>
 <body>
 
-<div id="viewport">
-    <div class="hud">
-        <div class="hud-card"><span class="hud-label">Efterlysning</span><div id="stars" style="color:var(--auth-blue)">★★</div></div>
-        <div class="hud-card"><span class="hud-label">Score</span><span id="score-val" class="hud-val">0</span></div>
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-brand">
+      <img src="assets/logo.png">
+      <span>AUTHENTIC</span>
     </div>
-
-    <div id="main-menu" class="overlay">
-        <div class="brand"><h1>AUTHENTIC<span> RP</span></h1></div>
-        <p style="letter-spacing: 5px; font-size: 10px; color: #555; margin-bottom: 20px;">POLITIETS RANGSISTE</p>
-        <div class="leaderboard" id="lb-content">Henter rankings...</div>
-        <button class="btn" onclick="startGame()">Start Flugten</button>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="applications.html">Ansøgninger</a>
+      <a href="staff.html">Staff</a>
+      <a href="game.html" class="active">MiniSpil</a>
+      <a href="https://docs.google.com/document/d/1nRhUJcx4joCEx1ZyuRJ-Ml2s04JpWjF4CiT2tOSLjQM/edit?usp=sharing" target="_blank">Regler</a>
+      <a href="https://discord.gg/authentic2026" target="_blank" class="btn-discord">Join Discord</a>
     </div>
+  </div>
+</nav>
 
-    <div id="game-over" class="overlay">
-        <h2 style="font-family:'Oswald'; letter-spacing:10px; color:var(--danger); margin:0;">ST STANDSET</h2>
-        <p class="hud-label">Din score blev:</p>
-        <h1 id="final-score" class="result-score">0</h1>
-        <button class="btn" onclick="promptSaveScore()">Gem på Leaderboard</button>
-        <button class="btn btn-alt" onclick="startGame()">Prøv igen</button>
-        <button class="btn btn-alt" style="font-size:0.8rem" onclick="showMenu()">Tilbage til menu</button>
+<div class="game-container">
+    <div id="viewport">
+        <div class="hud">
+            <div class="hud-card"><span class="hud-label">Efterlysning</span><div id="stars" style="color:var(--auth-blue)">★★</div></div>
+            <div class="hud-card"><span class="hud-label">Score</span><span id="score-val" class="hud-val">0</span></div>
+        </div>
+
+        <div id="main-menu" class="overlay">
+            <div class="brand"><h1>AUTHENTIC<span> RP</span></h1></div>
+            <p style="letter-spacing: 5px; font-size: 10px; color: #555; margin-bottom: 20px;">POLITIETS RANGLISTE</p>
+            <div class="leaderboard" id="lb-content">Henter rankings...</div>
+            <button class="btn" onclick="startGame()">Start Flugten</button>
+        </div>
+
+        <div id="game-over" class="overlay">
+            <h2 style="font-family:'Oswald'; letter-spacing:10px; color:var(--danger); margin:0;">BIL STANDSET</h2>
+            <p class="hud-label">Din score blev:</p>
+            <h1 id="final-score" class="result-score">0</h1>
+            <button class="btn" onclick="promptSaveScore()">Gem på Leaderboard</button>
+            <button class="btn btn-alt" onclick="startGame()">Prøv igen</button>
+            <button class="btn btn-alt" style="font-size:0.8rem" onclick="showMenu()">Tilbage til menu</button>
+        </div>
+
+        <canvas id="gameCanvas"></canvas>
     </div>
-
-    <canvas id="gameCanvas"></canvas>
 </div>
 
 <script>
@@ -146,7 +176,6 @@
     canvas.width = 440;
     canvas.height = 800;
 
-    // DIN DATABASE INFO (Tjek om disse stadig virker på jsonbin.io)
     const BIN_URL = "https://api.jsonbin.io/v3/b/69828440d0ea881f409e9cd4";
     const API_KEY = "$2a$10$DdEgWThNcqjJ.CpxiKG7eeZb6CPpcBaDtxs33z5KfPusmt.IC89si";
 
@@ -158,7 +187,6 @@
     let enemies = [];
     const keys = {};
 
-    // --- LEADERBOARD SYSTEM ---
     async function loadLeaderboard() {
         const lbBox = document.getElementById('lb-content');
         try {
@@ -187,16 +215,13 @@
         if(name && name.trim().length > 0) {
             document.getElementById('lb-content').innerHTML = "Gemmer på skyen...";
             try {
-                // Hent først
                 let res = await fetch(BIN_URL + "/latest", { headers: { "X-Master-Key": API_KEY } });
                 let current = await res.json();
                 let list = current.record.scores || [];
                 
-                // Tilføj ny
                 list.push({ name: name.substring(0, 15), score: score });
                 list.sort((a,b) => b.score - a.score);
                 
-                // Gem tilbage
                 await fetch(BIN_URL, {
                     method: 'PUT',
                     headers: { "Content-Type": "application/json", "X-Master-Key": API_KEY },
@@ -210,7 +235,6 @@
         }
     }
 
-    // --- SPIL LOGIK ---
     window.onkeydown = e => keys[e.code] = true;
     window.onkeyup = e => keys[e.code] = false;
 
@@ -277,7 +301,6 @@
 
         update();
         if(active) { 
-            // HER BRUGER VI FARVEN FRA CSS VARIBLEN
             ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--player-car');
             ctx.beginPath(); ctx.roundRect(player.x, player.y, player.w, player.h, 8); ctx.fill(); 
         }
